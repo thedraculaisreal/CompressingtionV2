@@ -60,7 +60,7 @@ Token create_token(char *word) {
 
 bool contains_white_space(char* buffer) {
     for (size_t i = 0; i < (strlen(buffer) - 1) ; ++i) {
-	if (buffer[i] == ' ' || buffer[i] == '\n' || buffer[i] == '\r' || buffer[i] == '\t') {
+	if (buffer[i] == ' ' || buffer[i] == '\n' || buffer[i] == '\r' || buffer[i] == '\t' || buffer[i] == '?' || buffer[i] == ',' || buffer[i] == '.') {
 	    return true;
 	}
     }
