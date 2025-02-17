@@ -17,6 +17,7 @@ int is_word_present(Token **tokens, char *buffer, size_t *token_count) {
 // turns all words into a token and stores them within an array.
 size_t tokenize(char *buffer, Token **tokens) {
     // start at 1 because cant be 0 bytes.
+    size_t word_count = 0;
     size_t token_count = 0;
     size_t counter = 0;
     size_t previous_num = 0;
@@ -33,13 +34,19 @@ size_t tokenize(char *buffer, Token **tokens) {
 		    if (ret >= 0) {
 			// increment individual token_value
 			(*tokens)[ret].value += 1;
+			// code a bit disgusting but basically we are dynamically allocating memory for our size_t indexs pointer each
+			// time the size of the array needs to increase, for that particular token
+			(*tokens)[ret].indexs = (size_t *)realloc((*tokens)[ret].indexs, ((*tokens)[ret].value + 1) * sizeof(size_t));
+			(*tokens)[ret].indexs[(*tokens)[ret].value] = word_count;
 		    } else {
 			// create new token
-			Token new_token = create_token(new_word);
+			Token new_token = create_token(new_word, word_count);
 			*tokens = (Token *)realloc(*tokens, (token_count + 1) * sizeof(Token));
 			(*tokens)[token_count] = new_token;
+			
 			token_count++;
 		    }
+		    word_count += 1;
 		}
 		counter = 0;
 		// start at next word.
@@ -50,11 +57,13 @@ size_t tokenize(char *buffer, Token **tokens) {
     return token_count;
 }
 
-Token create_token(char *word) {
+Token create_token(char *word, size_t word_count) {
     Token new_token;
     new_token.key = malloc(strlen(word) + 1);
+    new_token.indexs = malloc(sizeof(size_t));
     strcpy(new_token.key, word);
     new_token.value = 0;
+    new_token.indexs[0] = word_count;
     return new_token;
 }
 
