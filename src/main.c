@@ -16,14 +16,15 @@ int main(int argc, char **argv) {
 	    Token *tokens = NULL;
 	    size_t token_count = tokenize(buffer, &tokens);
 	    // allocating enough space in buffer for all the tokens to be written too.
-	    char new_buffer[token_count * 150];
+	    char new_buffer[token_count * 500];
         memset(new_buffer, 0, sizeof(new_buffer));
-        char write_buffer[1500];
-        char index_buffer[100];
+        char write_buffer[1000];
+        char index_buffer[20];
 	    
 	    for (size_t i = 0; i < token_count; ++i) { 
 	        memset(write_buffer, 0, sizeof(write_buffer));
-	        snprintf(write_buffer, sizeof(write_buffer), "%s: ", tokens[i].key);
+	        snprintf(write_buffer, sizeof(write_buffer), "%s: %zu", tokens[i].key, tokens[i].value);
+            
             if (tokens[i].value != 0) {
                 for (size_t j = 0; j < tokens[i].value; ++j) {
                     memset(index_buffer, 0, sizeof(index_buffer));
@@ -33,7 +34,7 @@ int main(int argc, char **argv) {
                     } else {
                         printf("Buffer overflow detected in index strcat");
                         exit(EXIT_FAILURE);
-                    }                  
+                    }
                 }                
             }
             

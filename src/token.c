@@ -27,27 +27,31 @@ size_t tokenize(char *buffer, Token **tokens) {
 	        if (counter >= 1) {
                 if (isspace(buffer[previous_num])) {
                     previous_num++;
-                }
+                }                
 		        char* new_word = malloc(counter); 
 		        memcpy(new_word, &buffer[previous_num], counter);
-		        new_word[counter] = '\0';		        
-		        int ret = is_word_present(tokens, new_word, &token_count);
-		        if (ret >= 0) {
-			        // increment individual token_value
-			        (*tokens)[ret].value += 1;
-			        // code a bit disgusting but basically we are dynamically
-                    // allocating memory for our size_t indexs pointer each
-			        // time the size of the array needs to increase, for that particular token
-			        (*tokens)[ret].indexs = (size_t *)realloc((*tokens)
-                    [ret].indexs, ((*tokens)[ret].value + 1) * sizeof(size_t));
-			        (*tokens)[ret].indexs[(*tokens)[ret].value] = word_count;
-		        } else {
-			        // create new token
-		            Token new_token = create_token(new_word, word_count);
-			        *tokens = (Token *)realloc(*tokens, (token_count + 1) * sizeof(Token));
-			        (*tokens)[token_count] = new_token;
-			        token_count++;
-		        }
+		        new_word[counter] = '\0';
+                if (is_white_space_present(new_word)) {
+                    // do nothing
+                } else {
+                    int ret = is_word_present(tokens, new_word, &token_count);
+		            if (ret >= 0) {
+			            // increment individual token_value
+			            (*tokens)[ret].value += 1;
+			            // code a bit disgusting but basically we are dynamically
+                        // allocating memory for our size_t indexs pointer each
+			            // time the size of the array needs to increase, for that particular token
+			            (*tokens)[ret].indexs = (size_t *)realloc((*tokens)
+                        [ret].indexs, ((*tokens)[ret].value + 1) * sizeof(size_t));
+			            (*tokens)[ret].indexs[(*tokens)[ret].value] = word_count;
+		            } else {
+			            // create new token
+		                Token new_token = create_token(new_word, word_count);
+			            *tokens = (Token *)realloc(*tokens, (token_count + 1) * sizeof(Token));
+			            (*tokens)[token_count] = new_token;
+			            token_count++;
+		            }
+                }                		        
 		        word_count += 1;
 		        counter = -1;
 		        // start at next word.
@@ -72,6 +76,15 @@ Token create_token(char *word, size_t word_count) {
 bool is_white_space(char target) {
     if (target == ' ' || target == '\n' || target == '\r' || target == '\t' || target == ',') {
         return true;
+    }
+    return false;
+}
+
+bool is_white_space_present(char* buffer) {
+    for (size_t i = 0; i < strlen(buffer); ++i) {
+        if (isspace(buffer[i])) {
+            return true;
+        }
     }
     return false;
 }
