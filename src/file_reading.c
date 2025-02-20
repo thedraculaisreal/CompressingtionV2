@@ -7,17 +7,17 @@ char* read_file_into_mem(const char *file_path) {
     int ret;
     FILE *fd = fopen(file_path, "r");
     if (!fd) {
-	perror("fopen");
-	return false;
+        perror("fopen");
+        return false;
     }
-
+    
     // place position at end of file to get byte offset for buffer size
     ret = fseek(fd, 0L, SEEK_END);
     if (ret < 0) {
-	perror("fseek");
-	return false;
+        perror("fseek");
+        return false;
     }
-
+    
     long buffer_size = ftell(fd);
     // set size of buffer
     // we also need to malloc, you may be asking why if you dont code in c and i will attempt to explain.
@@ -28,28 +28,22 @@ char* read_file_into_mem(const char *file_path) {
     // place position back to start of file.
     ret = fseek(fd, 0L, SEEK_SET);
     if (ret < 0) {
-	perror("fseek");
-	return false;
+        perror("fseek");
+        return false;
     }
-
+    
     ret = fread(buffer, sizeof(char), buffer_size, fd);
-
+    
     if (ferror(fd) != 0) {
-	perror("Error reading file");
-	return false;
+        perror("Error reading file");
+        return false;
     } else {
-	// not sure if you need to do this but always good practice to null terminate c strings.
-	buffer[buffer_size + 1] = '\0';
+        // not sure if you need to do this but always good practice to null terminate c strings.
+        buffer[buffer_size + 1] = '\0';
     }
     
     fclose(fd);
     return buffer;
 }
 
-// gonna count commas for now cuz they are annoytihn
-bool is_white_space(char target) {
-    if (target == ' ' || target == '\n' || target == '\r' || target == '\t' || target == ',') {
-	return true;
-    }
-    return false;
-}
+

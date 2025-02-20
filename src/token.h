@@ -8,4 +8,4 @@ typedef struct {
 
 size_t tokenize(char *buffer, Token **tokens);
 Token create_token(char *word, size_t word_count);
-bool contains_white_space(char* buffer);
+bool is_white_space(char target);
