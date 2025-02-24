@@ -18,7 +18,7 @@ bool compress_file(const char* file_path) {
 	
 	for (size_t i = 0; i < token_count; ++i) { 
 	    memset(write_buffer, 0, sizeof(write_buffer));
-	    snprintf(write_buffer, sizeof(write_buffer), "%s: %zu", tokens[i].key, tokens[i].value);
+	    snprintf(write_buffer, sizeof(write_buffer), "%s:", tokens[i].key);
         
         if (tokens[i].value != 0) {
             for (size_t j = 0; j < tokens[i].value; ++j) {
@@ -61,16 +61,65 @@ bool decompress_file(const char* file_path) {
         return false;
     }
 	char *buffer = read_file_into_mem(file_path);
+    new_token *tokens;
+    size_t previous_num = 0;
+    size_t counter = -1;
+    size_t token_count = 0;
+    for (size_t i = 0; i < strlen(buffer); ++i && ++counter) {
+        if (buffer[i] == ':') {
+            char* new_word = malloc(counter); 
+		    memcpy(new_word, &buffer[previous_num], counter);
+		    new_word[counter] = '\0';            
+            counter = 0;
+            previous_num = i + 1;
+            for (;i < strlen(buffer); ++i & ++counter) {
+                if (buffer[i] == ':') break;                                       
+                if (split_at_comma(buffer[i])) {
+                    char* new_num = malloc(counter); 
+		            memcpy(new_num, &buffer[previous_num], counter);
+		            new_num[counter] = '\0';
+                    tokens = (new_token *)realloc(tokens, (token_count + 1) * sizeof(new_token));
+                    tokens[token_count] = create_new_token(new_word, atoi(new_num));
+                    token_count++;
+                    counter = 0;
+                    previous_num = i + 1;   
+                }
+            }            
+        }
+    }
+    
 	FILE *fp = fopen(file_path, "w");
 	if (fp == NULL) {
 	    perror("fopen");
 	    return false;
 	}
     
-	printf("%s", buffer);
     return true;
 }
 
 bool wrong_ext(const char* file_path) {
-    return true;
+    return false;
+}
+
+bool split_at_comma(char letter) {
+    if (letter == ',') {
+        return true;
+    }
+    return false;
+}
+
+new_token create_new_token(char *buffer, size_t num) {
+    new_token token;
+    token.key = malloc(strlen(buffer) + 1);
+    strcpy(token.key, buffer);
+    token.index = num;
+    return token;
+}
+
+bool sort_tokens(new_token **tokens, size_t token_count) {
+    for (size_t i = 0; i < token_count; ++i) {
+        if ((*tokens)[i].index < (*tokens)[i].index) {
+            
+        }
+    }
 }
