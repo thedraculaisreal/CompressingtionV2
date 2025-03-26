@@ -1,0 +1,3 @@
+/home/schwarztoter/projects/c/CompressingtionV2/build/CMakeFiles/compresser.dir
+/home/schwarztoter/projects/c/CompressingtionV2/build/CMakeFiles/edit_cache.dir
+/home/schwarztoter/projects/c/CompressingtionV2/build/CMakeFiles/rebuild_cache.dir
