@@ -14,6 +14,11 @@ typedef struct {
     size_t count;
 } Pair;
 
+typedef struct {
+    Pair *pairs;
+    size_t pair_count;
+} PairStruct;
+
 static void handle_error(const char *error_string)
 {
     fprintf(stderr, "ERROR: %s", error_string);
@@ -58,6 +63,30 @@ static int exists(char *pair, Pair** pairs, size_t pair_count)
     return -1;
 }
 
+static void find_pairs(char **buffer, PairStruct *pair_struct)
+{
+    for (size_t i = 0; i < strlen(*buffer) - 1; ++i)
+    {        
+        char pair[3];
+        pair[2] = '\0';
+        memcpy(pair, &(*buffer)[i], 2);
+        if (isspace((*buffer)[i])) continue;
+        int index = exists(pair, &pair_struct->pairs, pair_struct->pair_count);
+
+        if (index != -1)
+        {            
+            pair_struct->pairs[index].count++;
+        }
+        else
+        {            
+            pair_struct->pairs = (Pair *) realloc(pair_struct->pairs, sizeof(Pair) * (pair_struct->pair_count + 1));            
+            strcpy(pair_struct->pairs[pair_struct->pair_count].pair, pair);
+            pair_struct->pairs[pair_struct->pair_count].count = 0;            
+            pair_struct->pair_count++;
+        }        
+    }
+}
+
 static char *replace_byte_pair(char *buffer, char *replacement, char *pair, size_t count)
 {
     
@@ -82,62 +111,58 @@ static char *replace_byte_pair(char *buffer, char *replacement, char *pair, size
     return result;
 }
 
-int main(int argc, char **argv)
+static int find_highest_freq(PairStruct *pair_struct)
 {
-    char *buffer;
-    read_file(argv[1], &buffer);
-        
-    Pair *pairs = NULL;
+    bool complete = false;    
     
-    size_t pair_count = 0;
-    
-    for (size_t i = 0; i < strlen(buffer) - 1; ++i)
-    {        
-        char pair[3];
-        pair[2] = '\0';
-        memcpy(pair, &buffer[i], 2);
-        if (isspace(buffer[i])) continue;
-        int index = exists(pair, &pairs, pair_count);
-
-        if (index != -1)
-        {            
-            pairs[index].count++;
-        }
-        else
-        {            
-            pairs = (Pair *) realloc(pairs, sizeof(Pair) * (pair_count + 1));            
-            strcpy(pairs[pair_count].pair, pair);
-            pairs[pair_count].count = 0;            
-            pair_count++;
-        }        
-    }
-
-    bool complete = false;
-    size_t index;
-    
-    for (size_t i = 0; i < pair_count; ++i)
+    for (size_t i = 0; i < pair_struct->pair_count; ++i)
     {
-        for (size_t j = 0; j < pair_count; ++j)
+        for (size_t j = 0; j < pair_struct->pair_count; ++j)
         {
-            if (pairs[i].count < pairs[j].count)
+            if (pair_struct->pairs[i].count < pair_struct->pairs[j].count)
             {
                 complete = false;
                 break;
             }
-            else {
+            else
+            {
                 complete = true;
             }
         }
         if (complete)
-        {
-            index = i;
+        {            
+            return i;
             break;
         }
     }
-        
-    char *result = replace_byte_pair(buffer, "X", pairs[index].pair, pairs[index].count);
+    
+    return -1;
+}
 
-    printf("%s", result);
+int main(int argc, char **argv)
+{
+    char *replacements[] = { "X", "Y", "Q", "R", "J", "L", "P" };
+    
+    char *buffer;
+    read_file(argv[1], &buffer);
+    
+    for (size_t i = 0; i < 7; ++i)
+    {
+        PairStruct pair_struct;
+        pair_struct.pairs = NULL;
+        pair_struct.pair_count = 0;
+
+        find_pairs(&buffer, &pair_struct);
+        
+        int index = find_highest_freq(&pair_struct);
+        if (index == -1) handle_error("Failed to read index");
+        
+        char *result = replace_byte_pair(buffer, replacements[i], pair_struct.pairs[index].pair, pair_struct.pairs[index].count);
+        free(buffer);
+        buffer = result;
+    }            
+    
+    printf("%s", buffer);
     
     return 0;
 }
