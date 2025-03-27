@@ -1,1 +1,0 @@
-/usr/bin/cc -Wl,--dependency-file=CMakeFiles/compressor.dir/link.d CMakeFiles/compressor.dir/src/main.c.o CMakeFiles/compressor.dir/src/compression.c.o -o compressor
