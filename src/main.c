@@ -4,16 +4,13 @@
 #include <string.h>
 #include <math.h>
 #include <errno.h>
+#include <ctype.h>
 #include "compression.h"
 
-typedef struct {
-    char pair[3];
-    char byte;
-} BytePair;
+// https://en.wikipedia.org/wiki/Byte_pair_encoding
 
 typedef struct {
     char pair[3];
-    size_t *index;
     size_t count;
 } Pair;
 
@@ -61,6 +58,30 @@ static int exists(char *pair, Pair** pairs, size_t pair_count)
     return -1;
 }
 
+static char *replace_byte_pair(char *buffer, char *replacement, char *pair, size_t count)
+{
+    
+    char *result = (char *) malloc(strlen(buffer) - count + 1);    
+
+    size_t j = 0;
+    for (size_t i = 0; i < strlen(buffer) - 1; ++i)
+    {                
+        if (strncmp(&buffer[i], pair, 2) == 0)
+        {            
+            strcpy(&result[j], replacement);            
+            j++;
+            i++; // skip next char
+        }
+        else
+        {            
+            result[j++] = buffer[i];
+            result[j] = '\0';
+        }
+    }
+    
+    return result;
+}
+
 int main(int argc, char **argv)
 {
     char *buffer;
@@ -75,34 +96,48 @@ int main(int argc, char **argv)
         char pair[3];
         pair[2] = '\0';
         memcpy(pair, &buffer[i], 2);
+        if (isspace(buffer[i])) continue;
         int index = exists(pair, &pairs, pair_count);
 
         if (index != -1)
         {            
             pairs[index].count++;
-            pairs[index].index = (size_t *) realloc(pairs[index].index, sizeof(size_t) * (pairs[index].count + 1));
-            pairs[index].index[pairs[index].count] = i;          
         }
         else
         {            
-            pairs = (Pair *) realloc(pairs, sizeof(Pair) * (pair_count + 1));
-            pairs[pair_count].index = malloc(sizeof(size_t));
+            pairs = (Pair *) realloc(pairs, sizeof(Pair) * (pair_count + 1));            
             strcpy(pairs[pair_count].pair, pair);
-            pairs[pair_count].count = 0;
-            pairs[pair_count].index[pairs[pair_count].count] = i;
+            pairs[pair_count].count = 0;            
             pair_count++;
-        }
+        }        
     }
 
+    bool complete = false;
+    size_t index;
+    
     for (size_t i = 0; i < pair_count; ++i)
-    {        
-        printf("%s -> ", pairs[i].pair);
-        for (size_t j = 0; j < pairs[i].count; ++j)
+    {
+        for (size_t j = 0; j < pair_count; ++j)
         {
-            printf("%zu, ",  pairs[i].index[j]);
+            if (pairs[i].count < pairs[j].count)
+            {
+                complete = false;
+                break;
+            }
+            else {
+                complete = true;
+            }
         }
-        printf("\n");
+        if (complete)
+        {
+            index = i;
+            break;
+        }
     }
+        
+    char *result = replace_byte_pair(buffer, "X", pairs[index].pair, pairs[index].count);
 
+    printf("%s", result);
+    
     return 0;
 }
