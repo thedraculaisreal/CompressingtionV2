@@ -76,17 +76,18 @@ void find_pairs(char **buffer, PairStruct *pair_struct)
     }
 }
 
-char *replace_byte_pair(char *buffer, char *replacement, char *pair, size_t count)
+char *replace_byte_pair(char *buffer, char replacement, char *pair, size_t count)
 {
     
-    char *result = (char *) malloc(strlen(buffer) - count + 1);    
+    char *result = (char *) malloc(strlen(buffer) - count + 1 );    
 
     size_t j = 0;
     for (size_t i = 0; i < strlen(buffer) - 1; ++i)
     {                
         if (strncmp(&buffer[i], pair, 2) == 0)
         {            
-            strcpy(&result[j], replacement);            
+            //strcpy(&result[j], replacement);
+            result[j] = replacement;
             j++;
             i++; // skip next char
         }
